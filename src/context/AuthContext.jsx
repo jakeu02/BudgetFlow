@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { createContext, useContext, useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 
 const AuthContext = createContext();
@@ -30,57 +30,15 @@ export const AuthProvider = ({ children }) => {
     // Safety timeout: prevent infinite loading
     const timeout = setTimeout(() => {
       setLoading(false);
-    }, 8000);
+    }, 10000);
 
-    const init = async () => {
-      try {
-        // If URL contains OAuth tokens, manually set the session
-        const hash = window.location.hash;
-        if (hash.includes('access_token') && hash.includes('refresh_token')) {
-          const params = new URLSearchParams(hash.substring(1));
-          const accessToken = params.get('access_token');
-          const refreshToken = params.get('refresh_token');
-          if (accessToken && refreshToken) {
-            const { data, error } = await supabase.auth.setSession({
-              access_token: accessToken,
-              refresh_token: refreshToken,
-            });
-            if (!error && data.session) {
-              // Clean up the URL hash
-              window.history.replaceState(null, '', window.location.pathname);
-              clearTimeout(timeout);
-              setSession(data.session);
-              setUser(data.session.user);
-              fetchProfile(data.session.user.id);
-              setLoading(false);
-              return;
-            }
-          }
-        }
-
-        // Normal session check
-        const { data: { session } } = await supabase.auth.getSession();
-        clearTimeout(timeout);
-        setSession(session);
-        setUser(session?.user ?? null);
-        if (session?.user) {
-          fetchProfile(session.user.id);
-        }
-        setLoading(false);
-      } catch (err) {
-        clearTimeout(timeout);
-        console.error('Failed to get session:', err);
-        setLoading(false);
-      }
-    };
-
-    init();
-
+    // Set up auth listener FIRST so we don't miss OAuth callback events
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === 'TOKEN_REFRESHED') return;
 
+      clearTimeout(timeout);
       setSession(session);
       setUser(session?.user ?? null);
       if (session?.user) {
@@ -103,6 +61,21 @@ export const AuthProvider = ({ children }) => {
       } else {
         setProfile(null);
       }
+      setLoading(false);
+    });
+
+    // Get initial session AFTER listener is registered
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!session) {
+        // Only stop loading if there's no OAuth hash in the URL
+        // (if there is, onAuthStateChange will handle it)
+        if (!window.location.hash.includes('access_token')) {
+          clearTimeout(timeout);
+          setLoading(false);
+        }
+      }
+    }).catch(() => {
+      clearTimeout(timeout);
       setLoading(false);
     });
 

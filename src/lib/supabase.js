@@ -14,8 +14,11 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
     persistSession: true,
     autoRefreshToken: true,
-    detectSessionInUrl: false,
+    detectSessionInUrl: true,
     flowType: 'implicit',
-    lock: (_name, _acquireTimeout, fn) => fn(),
+    // Only bypass locks in dev mode (prevents HMR hangs)
+    ...(import.meta.env.DEV && {
+      lock: (_name, _acquireTimeout, fn) => fn(),
+    }),
   },
 });
