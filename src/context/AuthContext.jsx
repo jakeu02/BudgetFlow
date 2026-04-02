@@ -27,31 +27,54 @@ export const AuthProvider = ({ children }) => {
   };
 
   useEffect(() => {
-    // Check if URL contains OAuth callback tokens
-    const hasAuthInUrl = window.location.hash.includes('access_token') ||
-      window.location.search.includes('code=');
-
-    // Safety timeout: prevent infinite loading if getSession() hangs
+    // Safety timeout: prevent infinite loading
     const timeout = setTimeout(() => {
       setLoading(false);
-    }, 5000);
+    }, 8000);
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      clearTimeout(timeout);
-      setSession(session);
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        fetchProfile(session.user.id);
+    const init = async () => {
+      try {
+        // If URL contains OAuth tokens, manually set the session
+        const hash = window.location.hash;
+        if (hash.includes('access_token') && hash.includes('refresh_token')) {
+          const params = new URLSearchParams(hash.substring(1));
+          const accessToken = params.get('access_token');
+          const refreshToken = params.get('refresh_token');
+          if (accessToken && refreshToken) {
+            const { data, error } = await supabase.auth.setSession({
+              access_token: accessToken,
+              refresh_token: refreshToken,
+            });
+            if (!error && data.session) {
+              // Clean up the URL hash
+              window.history.replaceState(null, '', window.location.pathname);
+              clearTimeout(timeout);
+              setSession(data.session);
+              setUser(data.session.user);
+              fetchProfile(data.session.user.id);
+              setLoading(false);
+              return;
+            }
+          }
+        }
+
+        // Normal session check
+        const { data: { session } } = await supabase.auth.getSession();
+        clearTimeout(timeout);
+        setSession(session);
+        setUser(session?.user ?? null);
+        if (session?.user) {
+          fetchProfile(session.user.id);
+        }
+        setLoading(false);
+      } catch (err) {
+        clearTimeout(timeout);
+        console.error('Failed to get session:', err);
+        setLoading(false);
       }
-      // If there's an auth token in the URL but no session yet,
-      // wait for onAuthStateChange to handle it instead
-      if (!session && hasAuthInUrl) return;
-      setLoading(false);
-    }).catch((err) => {
-      clearTimeout(timeout);
-      console.error('Failed to get session:', err);
-      setLoading(false);
-    });
+    };
+
+    init();
 
     const {
       data: { subscription },
