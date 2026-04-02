@@ -5,7 +5,8 @@
       "Bash(ls -la \"c:\\\\Users\\\\Acer\\\\OneDrive\\\\Documents\\\\New folder \\(2\\)\\\\budget-tracker\\\\src\")",
       "Bash(ls \"c:/Users/Acer/OneDrive/Documents/New folder \\(2\\)/budget-tracker\")",
       "Bash(ls \"c:/Users/Acer/OneDrive/Documents/New folder \\(2\\)/budget-tracker/public\")",
-      "Bash(ls -lh \"/c/Users/Acer/OneDrive/Documents/New folder \\(2\\)/budget-tracker/public/BudgeFlow.apk\")"
+      "Bash(ls -lh \"/c/Users/Acer/OneDrive/Documents/New folder \\(2\\)/budget-tracker/public/BudgeFlow.apk\")",
+      "Bash(gh run list --limit 3)"
     ]
   }
 }
