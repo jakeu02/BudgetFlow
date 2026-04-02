@@ -102,7 +102,7 @@ export default function AuthPage({ defaultMode = 'login', onBack }) {
 
         {/* Logo */}
         <div className="mb-6 sm:mb-8 text-center">
-          <img src="/bf-transparent.png" alt="BudgetFlow" className="mx-auto mb-3 sm:mb-4 h-12 w-12 sm:h-14 sm:w-14 rounded-2xl shadow-lg shadow-primary-500/30" />
+          <img src={`${import.meta.env.BASE_URL}bf-transparent.png`} alt="BudgetFlow" className="mx-auto mb-3 sm:mb-4 h-12 w-12 sm:h-14 sm:w-14 rounded-2xl shadow-lg shadow-primary-500/30" />
           <h1 className="text-xl sm:text-2xl font-bold text-surface-900 dark:text-white">BudgetFlow</h1>
           <p className="text-xs sm:text-sm text-surface-400">
             {isLogin ? 'Welcome back! Sign in to continue.' : 'Create your account to get started.'}

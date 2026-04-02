@@ -77,7 +77,7 @@ export default function WelcomePage({ onNavigate }) {
       <nav className="sticky top-0 z-50 border-b border-surface-200 bg-white/80 backdrop-blur-xl dark:border-surface-800 dark:bg-surface-900/80">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
           <div className="flex items-center gap-2.5">
-            <img src="/bf-transparent.png" alt="BudgetFlow" className="h-9 w-9 rounded-xl" />
+            <img src={`${import.meta.env.BASE_URL}bf-transparent.png`} alt="BudgetFlow" className="h-9 w-9 rounded-xl" />
             <div>
               <span className="text-base font-bold text-surface-900 dark:text-white">BudgetFlow</span>
               <span className="ml-1.5 hidden text-xs text-surface-400 sm:inline">Smart Tracker</span>
@@ -165,7 +165,7 @@ export default function WelcomePage({ onNavigate }) {
               <HiOutlineDeviceMobile className="h-4 w-4" /> Also available on mobile
             </p>
             <a
-              href="/BudgeFlow.apk"
+              href={`${import.meta.env.BASE_URL}BudgeFlow.apk`}
               download
               className="inline-flex items-center gap-2.5 rounded-xl bg-gradient-to-r from-primary-500 to-primary-700 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-primary-500/30 transition-all hover:shadow-xl"
             >
@@ -399,7 +399,7 @@ export default function WelcomePage({ onNavigate }) {
           <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
             <div>
               <div className="flex items-center gap-2.5">
-                <img src="/bf-transparent.png" alt="BudgetFlow" className="h-8 w-8 rounded-lg" />
+                <img src={`${import.meta.env.BASE_URL}bf-transparent.png`} alt="BudgetFlow" className="h-8 w-8 rounded-lg" />
                 <span className="text-base font-bold text-surface-900 dark:text-white">BudgetFlow</span>
               </div>
               <p className="mt-3 text-sm leading-relaxed text-surface-500 dark:text-surface-400">

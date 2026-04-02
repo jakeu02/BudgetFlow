@@ -61,7 +61,7 @@ export default function Sidebar() {
         {/* Logo */}
         <div className="flex items-center justify-between px-4 py-4 sm:px-6 sm:py-6">
           <div className="flex items-center gap-2.5 sm:gap-3">
-            <img src="/bf-transparent.png" alt="BudgetFlow" className="h-9 w-9 rounded-xl shadow-lg shadow-primary-500/30 sm:h-10 sm:w-10" />
+            <img src={`${import.meta.env.BASE_URL}bf-transparent.png`} alt="BudgetFlow" className="h-9 w-9 rounded-xl shadow-lg shadow-primary-500/30 sm:h-10 sm:w-10" />
             <div>
               <h1 className="text-base font-bold text-surface-900 sm:text-lg dark:text-white">BudgetFlow</h1>
               <p className="text-xs text-surface-400">Smart Tracker</p>
