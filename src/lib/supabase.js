@@ -10,6 +10,10 @@ if (!supabaseUrl || !supabaseAnonKey) {
   );
 }
 
+// DEBUG: verify baked-in credentials (remove after fixing)
+console.log('SB_URL:', supabaseUrl);
+console.log('SB_KEY starts:', supabaseAnonKey?.substring(0, 20), '... ends:', supabaseAnonKey?.slice(-10));
+
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
     persistSession: true,

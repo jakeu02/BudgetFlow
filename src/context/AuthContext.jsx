@@ -39,15 +39,15 @@ export const AuthProvider = ({ children }) => {
           const accessToken = params.get('access_token');
           const refreshToken = params.get('refresh_token');
           // DEBUG: remove after fixing
-          alert('OAuth tokens found! AT: ' + (accessToken ? 'yes' : 'no') + ', RT: ' + (refreshToken || 'none'));
+          console.log('OAuth tokens found! AT:', !!accessToken, 'RT:', !!refreshToken);
           if (accessToken && refreshToken) {
             const { data, error } = await supabase.auth.setSession({
               access_token: accessToken,
               refresh_token: refreshToken,
             });
             // DEBUG: remove after fixing
-            if (error) alert('setSession error: ' + error.message);
-            else alert('setSession success! User: ' + data.session?.user?.email);
+            if (error) console.error('setSession error:', error.message);
+            else console.log('setSession success! User:', data.session?.user?.email);
             if (!error && data.session) {
               clearTimeout(timeout);
               setSession(data.session);
