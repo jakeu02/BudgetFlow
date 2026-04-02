@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#6366f1"/>
+      <stop offset="100%" stop-color="#4338ca"/>
+    </linearGradient>
+    <linearGradient id="accentGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#a5b4fc"/>
+      <stop offset="100%" stop-color="#818cf8"/>
+    </linearGradient>
+  </defs>
+  <!-- Rounded square background -->
+  <rect width="512" height="512" rx="112" ry="112" fill="url(#bgGrad)"/>
+  <!-- Stylized B letter -->
+  <path d="M168 108 h120
+    c50 0 90 36 90 82
+    c0 32 -18 58 -46 72
+    c36 14 60 46 60 84
+    c0 52 -44 92 -98 92
+    H168 Z
+    M228 242 h56
+    c22 0 38 -16 38 -38
+    s-16 -38 -38 -38
+    h-56 Z
+    M228 380 h66
+    c26 0 44 -18 44 -42
+    s-18 -42 -44 -42
+    h-66 Z"
+    fill="white"/>
+  <!-- Small upward trend arrow accent -->
+  <path d="M340 130 L370 100 L400 100 L400 130"
+    stroke="url(#accentGrad)" stroke-width="10" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <line x1="370" y1="100" x2="370" y2="130"
+    stroke="url(#accentGrad)" stroke-width="10" stroke-linecap="round"/>
+</svg>

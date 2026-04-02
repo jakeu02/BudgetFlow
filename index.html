@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="author" content="Jake Paragas" />
+    <meta name="copyright" content="&copy; 2025 BudgetFlow by Jake Paragas. All rights reserved." />
+    <meta name="description" content="BudgetFlow — Smart budget tracker. Track spending, set budgets, achieve savings goals." />
+    <title>BudgetFlow — Smart Budget Tracker</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+    <script>
+      // Anti-copy protection
+      document.addEventListener('contextmenu', function(e) { e.preventDefault(); });
+      document.addEventListener('keydown', function(e) {
+        // Block Ctrl+U (view source), Ctrl+S (save), Ctrl+Shift+I (devtools), Ctrl+Shift+J (console), F12
+        if (
+          (e.ctrlKey && e.key === 'u') ||
+          (e.ctrlKey && e.key === 's') ||
+          (e.ctrlKey && e.shiftKey && e.key === 'I') ||
+          (e.ctrlKey && e.shiftKey && e.key === 'J') ||
+          (e.ctrlKey && e.shiftKey && e.key === 'C') ||
+          e.key === 'F12'
+        ) {
+          e.preventDefault();
+        }
+      });
+      document.addEventListener('copy', function(e) { e.preventDefault(); });
+      document.addEventListener('cut', function(e) { e.preventDefault(); });
+      document.onselectstart = function() { return false; };
+      document.ondragstart = function() { return false; };
+    </script>
+  </body>
+</html>

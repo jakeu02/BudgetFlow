@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls -la \"c:\\\\Users\\\\Acer\\\\OneDrive\\\\Documents\\\\New folder \\(2\\)\\\\budget-tracker\")",
+      "Bash(ls -la \"c:\\\\Users\\\\Acer\\\\OneDrive\\\\Documents\\\\New folder \\(2\\)\\\\budget-tracker\\\\src\")",
+      "Bash(ls \"c:/Users/Acer/OneDrive/Documents/New folder \\(2\\)/budget-tracker\")",
+      "Bash(ls \"c:/Users/Acer/OneDrive/Documents/New folder \\(2\\)/budget-tracker/public\")"
+    ]
+  }
+}
