@@ -27,24 +27,70 @@ export const AuthProvider = ({ children }) => {
   };
 
   useEffect(() => {
-    // Safety timeout: prevent infinite loading
-    const timeout = setTimeout(() => {
-      setLoading(false);
-    }, 10000);
+    const timeout = setTimeout(() => { setLoading(false); }, 10000);
 
-    // Set up auth listener FIRST so we don't miss OAuth callback events
+    const init = async () => {
+      try {
+        // Check if OAuth hash was captured by index.html inline script
+        const storedHash = sessionStorage.getItem('sb_oauth_hash');
+        if (storedHash) {
+          sessionStorage.removeItem('sb_oauth_hash');
+          const params = new URLSearchParams(storedHash);
+          const accessToken = params.get('access_token');
+          const refreshToken = params.get('refresh_token');
+          if (accessToken && refreshToken) {
+            const { data, error } = await supabase.auth.setSession({
+              access_token: accessToken,
+              refresh_token: refreshToken,
+            });
+            if (!error && data.session) {
+              clearTimeout(timeout);
+              setSession(data.session);
+              setUser(data.session.user);
+              const profileData = await fetchProfile(data.session.user.id);
+              if (!profileData) {
+                const meta = data.session.user.user_metadata;
+                await supabase.from('profiles').upsert({
+                  id: data.session.user.id,
+                  full_name: meta?.full_name || meta?.name || null,
+                  age: null,
+                  occupation: null,
+                });
+                await fetchProfile(data.session.user.id);
+              }
+              setLoading(false);
+              return;
+            }
+          }
+        }
+
+        // Normal: check existing session
+        const { data: { session } } = await supabase.auth.getSession();
+        clearTimeout(timeout);
+        setSession(session);
+        setUser(session?.user ?? null);
+        if (session?.user) {
+          fetchProfile(session.user.id);
+        }
+        setLoading(false);
+      } catch (err) {
+        clearTimeout(timeout);
+        console.error('Auth init error:', err);
+        setLoading(false);
+      }
+    };
+
+    // Auth state change listener for sign in/out during the session
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (event === 'TOKEN_REFRESHED') return;
+      if (event === 'TOKEN_REFRESHED' || event === 'INITIAL_SESSION') return;
 
-      clearTimeout(timeout);
       setSession(session);
       setUser(session?.user ?? null);
       if (session?.user) {
         try {
           const profileData = await fetchProfile(session.user.id);
-          // Auto-create profile for first-time OAuth users
           if (!profileData && event === 'SIGNED_IN') {
             const meta = session.user.user_metadata;
             await supabase.from('profiles').upsert({
@@ -61,23 +107,9 @@ export const AuthProvider = ({ children }) => {
       } else {
         setProfile(null);
       }
-      setLoading(false);
     });
 
-    // Get initial session AFTER listener is registered
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!session) {
-        // Only stop loading if there's no OAuth hash in the URL
-        // (if there is, onAuthStateChange will handle it)
-        if (!window.location.hash.includes('access_token')) {
-          clearTimeout(timeout);
-          setLoading(false);
-        }
-      }
-    }).catch(() => {
-      clearTimeout(timeout);
-      setLoading(false);
-    });
+    init();
 
     return () => {
       clearTimeout(timeout);
