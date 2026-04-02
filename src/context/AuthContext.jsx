@@ -27,8 +27,11 @@ export const AuthProvider = ({ children }) => {
   };
 
   useEffect(() => {
+    // Check if URL contains OAuth callback tokens
+    const hasAuthInUrl = window.location.hash.includes('access_token') ||
+      window.location.search.includes('code=');
+
     // Safety timeout: prevent infinite loading if getSession() hangs
-    // (can happen with navigator.locks after HMR/hot reload)
     const timeout = setTimeout(() => {
       setLoading(false);
     }, 5000);
@@ -40,6 +43,9 @@ export const AuthProvider = ({ children }) => {
       if (session?.user) {
         fetchProfile(session.user.id);
       }
+      // If there's an auth token in the URL but no session yet,
+      // wait for onAuthStateChange to handle it instead
+      if (!session && hasAuthInUrl) return;
       setLoading(false);
     }).catch((err) => {
       clearTimeout(timeout);
