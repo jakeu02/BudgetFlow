@@ -11,8 +11,7 @@ if (!supabaseUrl || !supabaseAnonKey) {
 }
 
 // DEBUG: verify baked-in credentials (remove after fixing)
-console.log('SB_URL:', supabaseUrl);
-console.log('SB_KEY starts:', supabaseAnonKey?.substring(0, 20), '... ends:', supabaseAnonKey?.slice(-10));
+alert('SB_URL: ' + supabaseUrl + '\nSB_KEY starts: ' + supabaseAnonKey?.substring(0, 20) + '...' + supabaseAnonKey?.slice(-10));
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
