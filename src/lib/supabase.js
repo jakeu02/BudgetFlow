@@ -14,8 +14,8 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
     persistSession: true,
     autoRefreshToken: true,
-    detectSessionInUrl: true,
-    // Bypass navigator.locks which can hang during HMR/dev reloads
+    detectSessionInUrl: false,
+    flowType: 'implicit',
     lock: (_name, _acquireTimeout, fn) => fn(),
   },
 });
