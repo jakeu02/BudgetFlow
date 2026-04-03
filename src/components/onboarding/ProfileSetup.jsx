@@ -6,9 +6,10 @@ import {
   HiOutlineBriefcase,
 } from 'react-icons/hi';
 import { useAuth } from '../../context/AuthContext';
+import { supabase } from '../../lib/supabase';
 
 export default function ProfileSetup() {
-  const { profile, updateProfile } = useAuth();
+  const { user, profile, updateProfile } = useAuth();
   const [fullName, setFullName] = useState(profile?.full_name || '');
   const [age, setAge] = useState(profile?.age?.toString() || '');
   const [occupation, setOccupation] = useState(profile?.occupation || '');
@@ -33,18 +34,45 @@ export default function ProfileSetup() {
     }
 
     setSaving(true);
-    const { data, error: updateError } = await updateProfile({
+
+    const profileData = {
+      id: user.id,
       full_name: fullName.trim(),
       age: parseInt(age, 10),
       occupation: occupation.trim(),
-    });
-    setSaving(false);
+    };
 
-    if (updateError) {
-      setError(updateError.message || 'Failed to save profile. Please try again.');
-    } else if (!data) {
-      setError('Profile save returned no data. Please try again or check your connection.');
+    // Try upsert directly
+    const { data, error: dbError } = await supabase
+      .from('profiles')
+      .upsert(profileData)
+      .select()
+      .single();
+
+    if (dbError) {
+      // If upsert fails, try direct update
+      const { data: updateData, error: updateErr } = await supabase
+        .from('profiles')
+        .update({ full_name: profileData.full_name, age: profileData.age, occupation: profileData.occupation })
+        .eq('id', user.id)
+        .select()
+        .single();
+
+      if (updateErr) {
+        setSaving(false);
+        setError(`Save failed: ${dbError.message}. Update also failed: ${updateErr.message}`);
+        return;
+      }
+
+      // Update succeeded via fallback
+      await updateProfile({ full_name: profileData.full_name, age: profileData.age, occupation: profileData.occupation });
+      setSaving(false);
+      return;
     }
+
+    // Upsert succeeded - update local state
+    await updateProfile({ full_name: profileData.full_name, age: profileData.age, occupation: profileData.occupation });
+    setSaving(false);
   };
 
   const inputClass =
