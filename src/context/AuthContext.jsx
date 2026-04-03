@@ -52,7 +52,7 @@ export const AuthProvider = ({ children }) => {
                 const meta = data.session.user.user_metadata;
                 await supabase.from('profiles').upsert({
                   id: data.session.user.id,
-                  full_name: meta?.full_name || meta?.name || null,
+                  full_name: meta?.full_name || meta?.name || data.session.user.email?.split('@')[0] || null,
                   age: null,
                   occupation: null,
                 });
@@ -70,7 +70,18 @@ export const AuthProvider = ({ children }) => {
         setSession(session);
         setUser(session?.user ?? null);
         if (session?.user) {
-          fetchProfile(session.user.id);
+          const profileData = await fetchProfile(session.user.id);
+          if (!profileData) {
+            // Auto-create profile from user metadata
+            const meta = session.user.user_metadata;
+            await supabase.from('profiles').upsert({
+              id: session.user.id,
+              full_name: meta?.full_name || meta?.name || session.user.email?.split('@')[0] || null,
+              age: null,
+              occupation: null,
+            });
+            await fetchProfile(session.user.id);
+          }
         }
         setLoading(false);
       } catch (err) {
@@ -95,7 +106,7 @@ export const AuthProvider = ({ children }) => {
             const meta = session.user.user_metadata;
             await supabase.from('profiles').upsert({
               id: session.user.id,
-              full_name: meta?.full_name || meta?.name || null,
+              full_name: meta?.full_name || meta?.name || session.user.email?.split('@')[0] || null,
               age: null,
               occupation: null,
             });
