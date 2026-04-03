@@ -33,7 +33,7 @@ export default function ProfileSetup() {
     }
 
     setSaving(true);
-    const { error: updateError } = await updateProfile({
+    const { data, error: updateError } = await updateProfile({
       full_name: fullName.trim(),
       age: parseInt(age, 10),
       occupation: occupation.trim(),
@@ -41,7 +41,9 @@ export default function ProfileSetup() {
     setSaving(false);
 
     if (updateError) {
-      setError(updateError.message || 'Failed to save profile.');
+      setError(updateError.message || 'Failed to save profile. Please try again.');
+    } else if (!data) {
+      setError('Profile save returned no data. Please try again or check your connection.');
     }
   };
 
