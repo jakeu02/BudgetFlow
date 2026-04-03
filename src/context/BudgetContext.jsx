@@ -266,7 +266,7 @@ export const BudgetProvider = ({ children }) => {
   stateRef.current = state;
 
   // Fetch data from Supabase when user logs in
-  const fetchData = useCallback(async () => {
+  const fetchData = useCallback(async (retryCount = 0) => {
     if (!userId) return;
 
     baseDispatch({ type: 'SET_DATA_LOADING', payload: true });
@@ -341,6 +341,10 @@ export const BudgetProvider = ({ children }) => {
       }
     } catch (err) {
       console.error('Failed to fetch data:', err);
+      // Auto-retry up to 2 times (handles Supabase cold starts)
+      if (retryCount < 2) {
+        return fetchData(retryCount + 1);
+      }
       baseDispatch({ type: 'SET_ERROR', payload: err.message });
     } finally {
       baseDispatch({ type: 'SET_DATA_LOADING', payload: false });
