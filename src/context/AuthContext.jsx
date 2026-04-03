@@ -50,13 +50,17 @@ export const AuthProvider = ({ children }) => {
               const profileData = await fetchProfile(data.session.user.id);
               if (!profileData) {
                 const meta = data.session.user.user_metadata;
+                const autoName = meta?.full_name || meta?.name || data.session.user.email?.split('@')[0] || 'User';
                 await supabase.from('profiles').upsert({
                   id: data.session.user.id,
-                  full_name: meta?.full_name || meta?.name || data.session.user.email?.split('@')[0] || null,
+                  full_name: autoName,
                   age: null,
                   occupation: null,
                 });
-                await fetchProfile(data.session.user.id);
+                const saved = await fetchProfile(data.session.user.id);
+                if (!saved) {
+                  setProfile({ id: data.session.user.id, full_name: autoName, age: null, occupation: null });
+                }
               }
               setLoading(false);
               return;
@@ -74,13 +78,18 @@ export const AuthProvider = ({ children }) => {
           if (!profileData) {
             // Auto-create profile from user metadata
             const meta = session.user.user_metadata;
+            const autoName = meta?.full_name || meta?.name || session.user.email?.split('@')[0] || 'User';
             await supabase.from('profiles').upsert({
               id: session.user.id,
-              full_name: meta?.full_name || meta?.name || session.user.email?.split('@')[0] || null,
+              full_name: autoName,
               age: null,
               occupation: null,
             });
-            await fetchProfile(session.user.id);
+            const saved = await fetchProfile(session.user.id);
+            if (!saved) {
+              // DB read failed (RLS issue) — set profile locally so user isn't blocked
+              setProfile({ id: session.user.id, full_name: autoName, age: null, occupation: null });
+            }
           }
         }
         setLoading(false);
@@ -104,13 +113,17 @@ export const AuthProvider = ({ children }) => {
           const profileData = await fetchProfile(session.user.id);
           if (!profileData && event === 'SIGNED_IN') {
             const meta = session.user.user_metadata;
+            const autoName = meta?.full_name || meta?.name || session.user.email?.split('@')[0] || 'User';
             await supabase.from('profiles').upsert({
               id: session.user.id,
-              full_name: meta?.full_name || meta?.name || session.user.email?.split('@')[0] || null,
+              full_name: autoName,
               age: null,
               occupation: null,
             });
-            await fetchProfile(session.user.id);
+            const saved = await fetchProfile(session.user.id);
+            if (!saved) {
+              setProfile({ id: session.user.id, full_name: autoName, age: null, occupation: null });
+            }
           }
         } catch (err) {
           console.error('Auth state change error:', err);
