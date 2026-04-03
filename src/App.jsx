@@ -16,6 +16,7 @@ import ReportsPage from './components/reports/ReportsPage';
 import AboutPage from './components/about/AboutPage';
 import TermsPage from './components/legal/TermsPage';
 import PrivacyPage from './components/legal/PrivacyPage';
+import ProfileSetup from './components/onboarding/ProfileSetup';
 import OfflineIndicator from './components/common/OfflineIndicator';
 
 function AppContent() {
@@ -99,7 +100,7 @@ function AppContent() {
 }
 
 function AuthGate() {
-  const { user, loading } = useAuth();
+  const { user, profile, loading } = useAuth();
   const [authView, setAuthView] = useState('welcome');
 
   if (loading) {
@@ -138,6 +139,11 @@ function AuthGate() {
         onBack={(view) => setAuthView(typeof view === 'string' ? view : 'welcome')}
       />
     );
+  }
+
+  // Show profile setup for new/incomplete profiles
+  if (!profile?.full_name || !profile?.age || !profile?.occupation) {
+    return <ProfileSetup />;
   }
 
   return (
