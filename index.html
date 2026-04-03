@@ -15,11 +15,18 @@
   <body>
     <div id="root"></div>
     <script>
-      // Capture OAuth hash before React/Supabase loads
+      // Capture OAuth hash/errors before React/Supabase loads
       (function() {
         var h = window.location.hash;
         if (h && h.indexOf('access_token') !== -1) {
           sessionStorage.setItem('sb_oauth_hash', h.substring(1));
+          history.replaceState(null, '', window.location.pathname);
+        }
+        // Capture OAuth errors from query params
+        var params = new URLSearchParams(window.location.search);
+        var oauthError = params.get('error_description') || params.get('error');
+        if (oauthError) {
+          sessionStorage.setItem('sb_oauth_error', oauthError);
           history.replaceState(null, '', window.location.pathname);
         }
       })();

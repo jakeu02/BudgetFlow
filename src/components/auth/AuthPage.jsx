@@ -12,7 +12,7 @@ import {
 import { useAuth } from '../../context/AuthContext';
 import { validatePassword, sanitizeAuthError } from '../../utils/validation';
 
-export default function AuthPage({ defaultMode = 'login', onBack }) {
+export default function AuthPage({ defaultMode = 'login', onBack, oauthError }) {
   const { signUp, signIn, signInWithGoogle } = useAuth();
   const [isLogin, setIsLogin] = useState(defaultMode !== 'signup');
   const [email, setEmail] = useState('');
@@ -21,7 +21,7 @@ export default function AuthPage({ defaultMode = 'login', onBack }) {
   const [fullName, setFullName] = useState('');
   const [age, setAge] = useState('');
   const [occupation, setOccupation] = useState('');
-  const [error, setError] = useState('');
+  const [error, setError] = useState(oauthError || '');
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [successMsg, setSuccessMsg] = useState('');

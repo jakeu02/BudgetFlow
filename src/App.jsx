@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { BudgetProvider, useBudget } from './context/BudgetContext';
 import WelcomePage from './components/landing/WelcomePage';
@@ -102,6 +102,16 @@ function AppContent() {
 function AuthGate() {
   const { user, profile, loading } = useAuth();
   const [authView, setAuthView] = useState('welcome');
+  const [oauthError, setOauthError] = useState('');
+
+  useEffect(() => {
+    const err = sessionStorage.getItem('sb_oauth_error');
+    if (err) {
+      sessionStorage.removeItem('sb_oauth_error');
+      setOauthError(err.replace(/\+/g, ' '));
+      setAuthView('login');
+    }
+  }, []);
 
   if (loading) {
     return (
@@ -137,6 +147,7 @@ function AuthGate() {
       <AuthPage
         defaultMode={authView === 'signup' ? 'signup' : 'login'}
         onBack={(view) => setAuthView(typeof view === 'string' ? view : 'welcome')}
+        oauthError={oauthError}
       />
     );
   }
