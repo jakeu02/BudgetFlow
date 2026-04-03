@@ -13,6 +13,7 @@ import {
 } from 'react-icons/hi';
 import { useBudget } from '../../context/BudgetContext';
 import { useAuth } from '../../context/AuthContext';
+import { supabase } from '../../lib/supabase';
 import { CURRENCIES } from '../../utils/constants';
 import { exportData, importData } from '../../utils/backup';
 
@@ -26,6 +27,7 @@ export default function Settings() {
   const [editAge, setEditAge] = useState('');
   const [editOccupation, setEditOccupation] = useState('');
   const [saving, setSaving] = useState(false);
+  const [profileError, setProfileError] = useState('');
   const [backupLoading, setBackupLoading] = useState(false);
   const [backupMessage, setBackupMessage] = useState(null);
   const fileInputRef = useRef(null);
@@ -38,16 +40,55 @@ export default function Settings() {
     setEditName(profile?.full_name || '');
     setEditAge(profile?.age?.toString() || '');
     setEditOccupation(profile?.occupation || '');
+    setProfileError('');
     setEditing(true);
   };
 
   const saveProfile = async () => {
+    setProfileError('');
+
+    if (!editName.trim()) {
+      setProfileError('Full name is required.');
+      return;
+    }
+    if (!editAge || isNaN(editAge) || parseInt(editAge) < 13 || parseInt(editAge) > 120) {
+      setProfileError('Please enter a valid age (13-120).');
+      return;
+    }
+    if (!editOccupation.trim()) {
+      setProfileError('Occupation is required.');
+      return;
+    }
+
     setSaving(true);
-    await updateProfile({
+
+    const updates = {
       full_name: editName.trim(),
-      age: editAge ? parseInt(editAge, 10) : null,
-      occupation: editOccupation.trim() || null,
-    });
+      age: parseInt(editAge, 10),
+      occupation: editOccupation.trim(),
+    };
+
+    // Write directly to DB first, then update local state
+    const { error: dbError } = await supabase
+      .from('profiles')
+      .upsert({ id: user.id, ...updates });
+
+    if (dbError) {
+      // Fallback: try update
+      const { error: updateErr } = await supabase
+        .from('profiles')
+        .update(updates)
+        .eq('id', user.id);
+
+      if (updateErr) {
+        setSaving(false);
+        setProfileError(`Save failed: ${dbError.message}`);
+        return;
+      }
+    }
+
+    // DB write succeeded — update local state
+    await updateProfile(updates);
     setSaving(false);
     setEditing(false);
   };
@@ -103,6 +144,11 @@ export default function Settings() {
 
         {editing ? (
           <div className="space-y-3">
+            {profileError && (
+              <div className="rounded-xl bg-danger-50 px-4 py-3 text-sm text-danger-600 dark:bg-danger-500/10 dark:text-danger-400">
+                {profileError}
+              </div>
+            )}
             <div>
               <label className="mb-1 block text-xs font-medium text-surface-500 dark:text-surface-400">Full Name</label>
               <input
