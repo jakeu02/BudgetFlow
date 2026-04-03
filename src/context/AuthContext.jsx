@@ -193,8 +193,7 @@ export const AuthProvider = ({ children }) => {
     if (!user) return { error: new Error('Not authenticated') };
     const { data, error } = await supabase
       .from('profiles')
-      .update(updates)
-      .eq('id', user.id)
+      .upsert({ id: user.id, ...updates })
       .select()
       .single();
     if (!error && data) setProfile(data);
