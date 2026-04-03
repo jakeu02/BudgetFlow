@@ -191,13 +191,17 @@ export const AuthProvider = ({ children }) => {
 
   const updateProfile = async (updates) => {
     if (!user) return { error: new Error('Not authenticated') };
-    const { data, error } = await supabase
+
+    // Update local state immediately (optimistic)
+    const updatedProfile = { ...profile, id: user.id, ...updates };
+    setProfile(updatedProfile);
+
+    // Save to DB in background
+    const { error } = await supabase
       .from('profiles')
-      .upsert({ id: user.id, ...updates })
-      .select()
-      .single();
-    if (!error && data) setProfile(data);
-    return { data, error };
+      .upsert({ id: user.id, ...updates });
+
+    return { data: updatedProfile, error };
   };
 
   return (
