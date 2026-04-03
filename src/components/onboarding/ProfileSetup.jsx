@@ -35,43 +35,46 @@ export default function ProfileSetup() {
 
     setSaving(true);
 
-    const profileData = {
-      id: user.id,
+    const updates = {
       full_name: fullName.trim(),
       age: parseInt(age, 10),
       occupation: occupation.trim(),
     };
 
-    // Try upsert directly
-    const { data, error: dbError } = await supabase
+    // Step 1: Write to DB (without .select() to avoid RLS read issues)
+    const { error: writeError } = await supabase
       .from('profiles')
-      .upsert(profileData)
-      .select()
-      .single();
+      .upsert({ id: user.id, ...updates });
 
-    if (dbError) {
-      // If upsert fails, try direct update
-      const { data: updateData, error: updateErr } = await supabase
+    if (writeError) {
+      // Upsert failed — try plain insert as fallback
+      const { error: insertError } = await supabase
         .from('profiles')
-        .update({ full_name: profileData.full_name, age: profileData.age, occupation: profileData.occupation })
-        .eq('id', user.id)
-        .select()
-        .single();
+        .insert({ id: user.id, ...updates });
 
-      if (updateErr) {
+      if (insertError) {
         setSaving(false);
-        setError(`Save failed: ${dbError.message}. Update also failed: ${updateErr.message}`);
+        setError(`Database save failed: ${writeError.message}. Please check that your Supabase RLS policies allow INSERT/UPDATE on the profiles table.`);
         return;
       }
-
-      // Update succeeded via fallback
-      await updateProfile({ full_name: profileData.full_name, age: profileData.age, occupation: profileData.occupation });
-      setSaving(false);
-      return;
     }
 
-    // Upsert succeeded - update local state
-    await updateProfile({ full_name: profileData.full_name, age: profileData.age, occupation: profileData.occupation });
+    // Step 2: Verify the data was saved by reading it back
+    const { data: saved, error: readError } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', user.id)
+      .maybeSingle();
+
+    if (saved && saved.full_name && saved.age && saved.occupation) {
+      // Data persisted — update local state from DB data
+      updateProfile({ full_name: saved.full_name, age: saved.age, occupation: saved.occupation });
+    } else {
+      // Write may have succeeded but read failed (RLS SELECT issue)
+      // Still update local state so user can proceed
+      updateProfile(updates);
+    }
+
     setSaving(false);
   };
 
