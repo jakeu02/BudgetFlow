@@ -152,8 +152,8 @@ function AuthGate() {
     );
   }
 
-  // Show profile setup for new/incomplete profiles
-  if (!profile?.full_name || !profile?.age || !profile?.occupation) {
+  // Show profile setup only if no profile name at all (edge case)
+  if (!profile?.full_name) {
     return <ProfileSetup />;
   }
 
