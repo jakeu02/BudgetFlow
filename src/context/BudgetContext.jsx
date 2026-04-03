@@ -273,7 +273,7 @@ export const BudgetProvider = ({ children }) => {
     baseDispatch({ type: 'SET_ERROR', payload: null });
 
     // Helper: timeout a promise to prevent infinite hanging
-    const withTimeout = (promise, ms = 30000) =>
+    const withTimeout = (promise, ms = 15000) =>
       Promise.race([
         promise,
         new Promise((_, reject) => setTimeout(() => reject(new Error('Request timed out')), ms)),

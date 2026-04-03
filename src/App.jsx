@@ -19,7 +19,8 @@ import PrivacyPage from './components/legal/PrivacyPage';
 import OfflineIndicator from './components/common/OfflineIndicator';
 
 function AppContent() {
-  const { state } = useBudget();
+  const { state, fetchData } = useBudget();
+  const { signOut } = useAuth();
   const { activeView, dataLoading, error } = state;
 
   if (dataLoading) {
@@ -28,6 +29,34 @@ function AppContent() {
         <div className="text-center">
           <div className="mx-auto mb-4 h-10 w-10 animate-spin rounded-full border-4 border-primary-200 border-t-primary-600" />
           <p className="text-sm text-surface-400">Loading your data...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error && !state.transactions.length) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-surface-50 dark:bg-surface-950">
+        <div className="text-center max-w-sm px-4">
+          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-danger-100 dark:bg-danger-500/20">
+            <span className="text-xl">!</span>
+          </div>
+          <h2 className="mb-2 text-lg font-semibold text-surface-900 dark:text-white">Connection Error</h2>
+          <p className="mb-6 text-sm text-surface-400">{error}</p>
+          <div className="flex flex-col gap-2">
+            <button
+              onClick={() => fetchData()}
+              className="rounded-xl bg-primary-500 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-primary-600"
+            >
+              Retry
+            </button>
+            <button
+              onClick={() => { signOut(); localStorage.clear(); }}
+              className="rounded-xl border border-surface-200 px-5 py-2.5 text-sm font-medium text-surface-600 transition-colors hover:bg-surface-50 dark:border-surface-700 dark:text-surface-400 dark:hover:bg-surface-800"
+            >
+              Sign Out
+            </button>
+          </div>
         </div>
       </div>
     );
