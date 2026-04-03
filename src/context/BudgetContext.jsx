@@ -273,7 +273,9 @@ export const BudgetProvider = ({ children }) => {
     baseDispatch({ type: 'SET_ERROR', payload: null });
 
     // Helper: timeout a promise to prevent infinite hanging
-    const withTimeout = (promise, ms = 15000) =>
+    // 30s on first try, 45s on retries (database may be waking up)
+    const timeoutMs = retryCount === 0 ? 30000 : 45000;
+    const withTimeout = (promise, ms = timeoutMs) =>
       Promise.race([
         promise,
         new Promise((_, reject) => setTimeout(() => reject(new Error('Request timed out')), ms)),
@@ -341,8 +343,10 @@ export const BudgetProvider = ({ children }) => {
       }
     } catch (err) {
       console.error('Failed to fetch data:', err);
-      // Auto-retry up to 2 times (handles Supabase cold starts)
-      if (retryCount < 2) {
+      // Auto-retry up to 3 times (handles Supabase free tier cold starts)
+      if (retryCount < 3) {
+        // Wait 2 seconds before retrying to let the database wake up
+        await new Promise(r => setTimeout(r, 2000));
         return fetchData(retryCount + 1);
       }
       baseDispatch({ type: 'SET_ERROR', payload: err.message });
