@@ -183,6 +183,8 @@ export const AuthProvider = ({ children }) => {
 
   const signOut = async () => {
     const { error } = await supabase.auth.signOut();
+    setSession(null);
+    setUser(null);
     setProfile(null);
     return { error };
   };
