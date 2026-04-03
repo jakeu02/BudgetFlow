@@ -16,7 +16,6 @@ import ReportsPage from './components/reports/ReportsPage';
 import AboutPage from './components/about/AboutPage';
 import TermsPage from './components/legal/TermsPage';
 import PrivacyPage from './components/legal/PrivacyPage';
-import ProfileSetup from './components/onboarding/ProfileSetup';
 import OfflineIndicator from './components/common/OfflineIndicator';
 
 function AppContent() {
@@ -100,7 +99,7 @@ function AppContent() {
 }
 
 function AuthGate() {
-  const { user, profile, loading } = useAuth();
+  const { user, loading } = useAuth();
   const [authView, setAuthView] = useState('welcome');
   const [oauthError, setOauthError] = useState('');
 
@@ -150,11 +149,6 @@ function AuthGate() {
         oauthError={oauthError}
       />
     );
-  }
-
-  // Show profile setup only if no profile name at all (edge case)
-  if (!profile?.full_name) {
-    return <ProfileSetup />;
   }
 
   return (
